@@ -2,34 +2,11 @@ spring:
   application:
     title: api-github
     version: 2023.01
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 5000
-            readTimeout: 5000
-            loggerLevel: basic
 
 server:
   port: 8080
   servlet:
     context-path: /api/github/v1
-
-management:
-  endpoints:
-    jmx:
-      exposure:
-        include: "*"
-    web:
-      exposure:
-        include: health, info, metrics, actuator
-    metrics:
-      enable:
-        jvm: true
-    endpoint:
-      metrics:
-        enabled: true
 
 logging:
   level:
