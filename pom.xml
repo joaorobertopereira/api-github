@@ -71,6 +71,7 @@
 			<scope>test</scope>
 		</dependency>
 
+
 	</dependencies>
 
 	<build>
@@ -118,6 +119,8 @@
 						<artifactId>mapstruct-processor</artifactId>
 						<version>${mapstruct.version}</version>
 					</dependency>
+
+
 				</dependencies>
 				<executions>
 					<execution>
