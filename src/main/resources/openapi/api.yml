@@ -1,0 +1,90 @@
+openapi: "3.0.3"
+info:
+  version: "1.0.0"
+  title: "Task Backend Developer Kotlin"
+  description: "Cocus - Test"
+servers:
+  - url: 'http://localhost:8080/api/github/v1'
+tags:
+  - name: "Github"
+paths:
+  /repositories:
+    get:
+      tags:
+        - "repository"
+      summary: "get repository list from github"
+      description: "repository list"
+      operationId: "getAllRepoList"
+      x-examples:
+        - name: "Get repositories from a specific username"
+          description: "It provide the repositories list from a specific username"
+          parameters:
+            username: "username"
+      parameters:
+        - $ref: "#/components/parameters/username"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiResponseDTO"
+        "404":
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExceptionResponse"
+        "406":
+          description: "Not Acceptable"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExceptionResponse"
+
+components:
+  schemas:
+    ExceptionResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+
+    Commit:
+      type: object
+      properties:
+        sha:
+          type: string
+
+    BranchResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        commit:
+          $ref: "#/components/schemas/Commit"
+
+    ApiResponseDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        login:
+          type: string
+        branches:
+          type: array
+          items:
+            $ref: "#/components/schemas/BranchResponse"
+  parameters:
+    username:
+      name: "username"
+      in: header
+      description: "username from github"
+      required: true
+      schema:
+        type: string
+        maxLength: 256
