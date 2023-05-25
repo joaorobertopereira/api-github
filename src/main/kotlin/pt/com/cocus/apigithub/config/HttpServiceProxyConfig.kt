@@ -1,4 +1,4 @@
-package pt.com.cocus.apigithub.adapter.config
+package pt.com.cocus.apigithub.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
