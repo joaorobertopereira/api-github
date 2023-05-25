@@ -13,7 +13,8 @@ class GithubController(private val service: GithubService) {
     @GetMapping("/{username}")
     suspend fun getAllRepoList(
         @Valid @PathVariable("username") username: String,
-        @RequestHeader("Authorization") auth : String): ResponseEntity<List<ApiResponseDTO>> {
+        @RequestHeader("Authorization") auth : String
+    ): ResponseEntity<List<ApiResponseDTO>> {
         return ResponseEntity.ok(service.getApiResponse(username, auth))
     }
 
