@@ -13,22 +13,20 @@ import pt.com.cocus.apigithub.model.RepoResponse
 @Service
 class WebClientService(private val webClient: WebClient) {
 
-    suspend fun getAllRepositories(username: String, auth: String) : List<RepoResponse> {
+    suspend fun getAllRepositories(username: String) : List<RepoResponse> {
         LOGGER.info("[WebClient][GET][Repositories]-Message: Get a List of repositories from : $username")
         return webClient.get()
                 .uri("/users/$username/repos")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", auth)
                 .retrieve()
                 .awaitBody<List<RepoResponse>>()
     }
 
-    suspend fun getAllBranches(username: String, repo: String, auth: String) : List<BranchResponse> {
+    suspend fun getAllBranches(username: String, repo: String) : List<BranchResponse> {
         LOGGER.info("[WebClient][GET][Branch]-Message: Get a List of branches from repository : $repo")
         return webClient.get()
                 .uri("/repos/$username/$repo/branches")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization",auth)
                 .retrieve()
                 .awaitBody<List<BranchResponse>>()
     }

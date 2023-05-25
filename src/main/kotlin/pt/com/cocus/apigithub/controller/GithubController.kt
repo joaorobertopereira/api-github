@@ -11,13 +11,12 @@ import pt.com.cocus.apigithub.service.GithubService
 @RequestMapping("/api/github/v1")
 class GithubController(private val service: GithubService) {
 
-    @GetMapping("/{username}")
+    @GetMapping
     suspend fun getAllRepoList(
-        @PathVariable("username") username: String,
-        @RequestHeader("Authorization") auth : String
+        @RequestHeader("username") username: String
     ): ResponseEntity<List<ApiResponseDTO>> {
         LOGGER.info("[GithubController][INFO][getAllRepoList]-Message: Start process to get the repository list")
-        return ResponseEntity.ok(service.getApiResponse(username, auth))
+        return ResponseEntity.ok(service.getApiResponse(username))
     }
 
     companion object {

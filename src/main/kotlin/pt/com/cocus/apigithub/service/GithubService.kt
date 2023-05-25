@@ -10,18 +10,18 @@ import java.util.stream.Stream
 @Service
 class GithubService(private val webClientService: WebClientService) {
 
-    private suspend fun getAllRepositoryList(username: String, auth: String): Stream<RepoResponse>? {
+    private suspend fun getAllRepositoryList(username: String): Stream<RepoResponse>? {
         LOGGER.info("[GithubService][INFO][Repository]-Message: Filter repository not Forks.")
-        val webClientRepo = webClientService.getAllRepositories(username, auth)
+        val webClientRepo = webClientService.getAllRepositories(username)
         return webClientRepo.stream().filter { repo -> !repo.fork }
     }
 
-    suspend fun getApiResponse(username: String, auth: String) : List<ApiResponseDTO>? {
-        val repoList = getAllRepositoryList(username, auth)
+    suspend fun getApiResponse(username: String) : List<ApiResponseDTO>? {
+        val repoList = getAllRepositoryList(username)
         var response = mutableListOf<ApiResponseDTO>()
         if (repoList != null) {
             for (repo in repoList) {
-                val branchRepo = webClientService.getAllBranches(repo.owner.login, repo.name, auth)
+                val branchRepo = webClientService.getAllBranches(repo.owner.login, repo.name)
                 val apiResponseDTO = ApiResponseDTO(null,null,null)
                 apiResponseDTO.name = repo.name
                 apiResponseDTO.login = repo.owner.login
