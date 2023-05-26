@@ -46,6 +46,23 @@ paths:
 
 components:
   schemas:
+
+    Owner:
+      type: object
+      properties:
+        login:
+          type: string
+
+    RepoResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        owner:
+          $ref: "#/components/schemas/Owner"
+        fork:
+          type: boolean
+
     ExceptionResponse:
       type: object
       properties:
@@ -79,7 +96,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/BranchResponse"
+
   parameters:
+
     username:
       name: "username"
       in: header

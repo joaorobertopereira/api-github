@@ -6,8 +6,8 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
-import pt.com.cocus.apigithub.model.RepoResponse
 import pt.com.cocus.generated.model.BranchResponse
+import pt.com.cocus.generated.model.RepoResponse
 
 
 @Service
