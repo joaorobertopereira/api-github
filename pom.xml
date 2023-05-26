@@ -156,6 +156,7 @@
 						</goals>
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/openapi/api.yml</inputSpec>
+							<templateDirectory>${project.basedir}/template</templateDirectory>
 							<generatorName>kotlin-spring</generatorName>
 							<output>${project.build.directory}/generated-sources/openapi</output>
 							<apiPackage>${project.groupId}.generated.api</apiPackage>

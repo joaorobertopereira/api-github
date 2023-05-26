@@ -21,7 +21,7 @@ paths:
           parameters:
             username: "username"
       parameters:
-        - $ref: "#/components/parameters/username"
+        - $ref: "#/components/parameters/Username"
       responses:
         "200":
           description: "OK"
@@ -99,7 +99,7 @@ components:
 
   parameters:
 
-    username:
+    Username:
       name: "username"
       in: header
       description: "username from github"
