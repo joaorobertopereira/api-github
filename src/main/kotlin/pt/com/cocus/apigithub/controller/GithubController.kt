@@ -34,11 +34,13 @@ class GithubController(private val service: GithubService) {
     suspend fun getAllRepoList(
         @Size(max=256)
         @Parameter(description = "username from github", `in` = ParameterIn.HEADER, required = true)
-        @RequestHeader(value = "username", required = true) username: String) : ResponseEntity<Flow<ApiResponseDTO>> {
+        @RequestHeader(value = "username", required = true) username: String,
+        @Parameter(description = "Github Token", `in` = ParameterIn.HEADER)
+        @RequestHeader(value = "Authorization", required = false) authorization: String) : ResponseEntity<Flow<ApiResponseDTO>> {
 
         LOGGER.info("[GithubController][INFO][getAllRepoList]-Message: Start process to get the repository list")
 
-        return ResponseEntity.ok(service.getApiResponse(username))
+        return ResponseEntity.ok(service.getApiResponse(authorization, username))
     }
 
     companion object {

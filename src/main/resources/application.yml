@@ -12,7 +12,7 @@ logging:
     pt:
       com:
         cocus:
-          adapter: info
+          service: info
 
 api-github:
   url: https://api.github.com

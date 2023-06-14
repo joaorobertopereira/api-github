@@ -20,8 +20,10 @@ paths:
           description: "It provide the repositories list from a specific username"
           parameters:
             username: "username"
+            Authorization: "Authorization"
       parameters:
         - $ref: "#/components/parameters/Username"
+        - $ref: "#/components/parameters/Authorization"
       responses:
         "200":
           description: "OK"
@@ -107,3 +109,10 @@ components:
       schema:
         type: string
         maxLength: 256
+
+    Authorization:
+      name: "Authorization"
+      in: header
+      description: "Github Token"
+      schema:
+        type: string
