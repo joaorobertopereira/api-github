@@ -33,7 +33,7 @@ class ExceptionHandler  {
             ResponseEntity<ExceptionResponse> {
 
         val exceptionResponse = ExceptionResponse(
-            exchange.response.statusCode?.value(),
+            HttpStatus.BAD_REQUEST.value(),
             ex.message
         )
         LOGGER.error("[Handler][BAD_REQUEST]-Message: Bad Request: {}",
