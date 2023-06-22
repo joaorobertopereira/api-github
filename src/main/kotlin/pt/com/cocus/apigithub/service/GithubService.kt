@@ -17,26 +17,20 @@ class GithubService(private val webClientService: WebClientService) {
         return webClientRepo.stream().filter { repo -> !repo.fork!! }
     }
 
-    suspend fun getApiResponse(username: String) : ModelApiResponse? {
+    suspend fun getApiResponse(username: String): ModelApiResponse? {
         val repoList = getAllRepositoryList(username)
-        var repoListResponse = mutableListOf<Repository>()
+        val repoListResponse = mutableListOf<Repository>()
         if (repoList != null) {
             for (repo in repoList) {
-                val branchRepo = repo.owner?.login?.let { repo.name?.let { it1 ->  webClientService.getAllBranches(it,it1) } }
-                val repository = Repository(repo.name, repo.owner?.login,branchRepo)
+                val branchRepo =
+                    repo.owner?.login?.let { repo.name?.let { it1 -> webClientService.getAllBranches(it, it1) } }
+                val repository = Repository(repo.name, repo.owner?.login, branchRepo)
 
                 repoListResponse.add(repository)
             }
         }
 
-        var response = ModelApiResponse()
-        response.repositories = repoListResponse
-
-        return response
-    }
-
-    fun mapResponse(repository: Repository) : Repository {
-        return Repository(repository.name, repository.login, repository.branches)
+        return ModelApiResponse(repoListResponse)
     }
 
     companion object {

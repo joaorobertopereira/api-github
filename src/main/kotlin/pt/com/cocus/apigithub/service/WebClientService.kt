@@ -22,13 +22,13 @@ class WebClientService(private val webClient: WebClient) {
                 .awaitBody<List<RepoResponse>>()
     }
 
-    suspend fun getAllBranches(username: String, repo: String) : List<BranchResponse> {
+    suspend fun getAllBranches(username: String, repo: String) : MutableList<BranchResponse> {
         LOGGER.info("[WebClient][GET][Branch]-Message: Get a List of branches from repository : $repo")
         return webClient.get()
                 .uri("/repos/$username/$repo/branches")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .awaitBody<List<BranchResponse>>()
+                .awaitBody<MutableList<BranchResponse>>()
     }
 
     companion object {

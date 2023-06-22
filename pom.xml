@@ -204,6 +204,7 @@
 								<generateSupportingFiles>false</generateSupportingFiles>
 								<interfaceOnly>true</interfaceOnly>
 								<reactive>true</reactive>
+								<modelMutable>true</modelMutable>
 							</configOptions>
 						</configuration>
 					</execution>
