@@ -160,6 +160,8 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<compilerPlugins>
 						<plugin>spring</plugin>
 					</compilerPlugins>
@@ -173,10 +175,17 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.2</version>
+			</plugin>
+
+			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
 				<configuration>
+					<nowarn>true</nowarn>
 					<args>
 						<arg>-Xjsr305=strict</arg>
 					</args>
@@ -192,6 +201,12 @@
 								<sourceDir>${project.build.directory}/generated-sources/src/main/kotlin</sourceDir>
 							</sourceDirs>
 						</configuration>
+					</execution>
+					<execution>
+						<id>test-compile</id>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
 					</execution>
 				</executions>
 				<dependencies>
