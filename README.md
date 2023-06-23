@@ -1,6 +1,7 @@
-# Read Me First
-The following was discovered as part of building this project:
+# API Github - Backend task Cocus
+(Kotlin Developer backend)
 
+[![Continuous Integration with GitHub Actions](https://github.com/joaorobertopereira/api-github/actions/workflows/continuous_integration.yml/badge.svg?branch=main)](https://github.com/joaorobertopereira/api-github/actions/workflows/continuous_integration.yml)
 [![Docker Hub Repo](https://img.shields.io/docker/pulls/joaoroberto/api-github.svg)](https://hub.docker.com/repository/docker/joaoroberto/api-github)
 
 # Getting Started
