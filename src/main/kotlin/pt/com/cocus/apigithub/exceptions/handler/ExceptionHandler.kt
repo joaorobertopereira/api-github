@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.server.ServerWebExchange
 import pt.com.cocus.apigithub.exceptions.ExceptionResponse
 import pt.com.cocus.apigithub.exceptions.NotAcceptableException
@@ -19,27 +18,13 @@ class ExceptionHandler  {
             ResponseEntity<ExceptionResponse> {
 
         val exceptionResponse = ExceptionResponse(
-            HttpStatus.NOT_FOUND.value(),
+            HttpStatus.NOT_FOUND.value() ,
             ex.message
         )
         LOGGER.error("[Handler][NOT-FOUND]-Message: Not Found repository with this username: {}",
             exchange.request.headers["username"]
         )
         return ResponseEntity<ExceptionResponse>(exceptionResponse, HttpStatus.NOT_FOUND)
-    }
-
-    @ExceptionHandler(WebClientException::class)
-    fun handleWebClientExceptions(ex: WebClientException, exchange: ServerWebExchange) :
-            ResponseEntity<ExceptionResponse> {
-
-        val exceptionResponse = ExceptionResponse(
-            HttpStatus.BAD_REQUEST.value(),
-            ex.message
-        )
-        LOGGER.error("[Handler][BAD_REQUEST]-Message: Bad Request: {}",
-            exchange.request.headers["username"]
-        )
-        return ResponseEntity<ExceptionResponse>(exceptionResponse, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(NotAcceptableException::class)

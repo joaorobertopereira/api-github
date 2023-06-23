@@ -16,12 +16,12 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Configuration
-class HttpServiceProxyConfig {
+open class HttpServiceProxyConfig {
 
     @Value("\${api-github.url}")
     lateinit var urlBase: String
     @Bean
-    fun webClient(builder: WebClient.Builder) : WebClient =
+    open fun webClient(builder: WebClient.Builder) : WebClient =
         builder
             .baseUrl(urlBase)
             .clientConnector(ReactorClientHttpConnector(httpClient()))
@@ -31,7 +31,7 @@ class HttpServiceProxyConfig {
             .build()
 
     @Bean
-    fun httpClient(): HttpClient {
+    open fun httpClient(): HttpClient {
         return HttpClient.create()
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
             .responseTimeout(Duration.ofMillis(5000))

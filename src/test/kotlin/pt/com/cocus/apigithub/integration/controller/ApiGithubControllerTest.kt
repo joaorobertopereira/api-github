@@ -22,7 +22,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class  ApiGithubControllerTest {
+open class  ApiGithubControllerTest {
 
     private lateinit var specification: RequestSpecification
     private lateinit var objectMapper: ObjectMapper
@@ -69,15 +69,15 @@ class  ApiGithubControllerTest {
         assertEquals("main", foundApiResponseOne.branches?.get(0)?.name)
         assertEquals("2297fa719f99879b68a0d3a87bb20d48db00854e", foundApiResponseOne.branches?.get(0)?.commit?.sha)
 
-//        val foundApiResponseTwo : Repository = content.repositories[1]
-//
-//        assertNotNull(foundApiResponseTwo.name)
-//        assertNotNull(foundApiResponseTwo.login)
-//        assertNotNull(foundApiResponseTwo.branches)
-//        assertEquals("app-api-github", foundApiResponseTwo.name)
-//        assertEquals("joaorobertopereira", foundApiResponseTwo.login)
-//        assertEquals("master", foundApiResponseTwo.branches?.get(0)?.name)
-//        assertEquals("c9b064c6bfd986bfc30d22832a55df1784bfd920", foundApiResponseTwo.branches?.get(0)?.commit?.sha)
+        val foundApiResponseTwo : Repository? = content.repositories?.get(1)
+
+        assertNotNull(foundApiResponseTwo!!.name)
+        assertNotNull(foundApiResponseTwo.login)
+        assertNotNull(foundApiResponseTwo.branches)
+        assertEquals("app-api-github", foundApiResponseTwo.name)
+        assertEquals("joaorobertopereira", foundApiResponseTwo.login)
+        assertEquals("master", foundApiResponseTwo.branches?.get(0)?.name)
+        assertEquals("c9b064c6bfd986bfc30d22832a55df1784bfd920", foundApiResponseTwo.branches?.get(0)?.commit?.sha)
 
     }
 
