@@ -7,15 +7,9 @@ servers:
   - url: 'http://localhost:8080/api/github/v1'
 tags:
   - name: Github
-    description: Operations about book
-    externalDocs:
-      description: Find out more
-      url: http://swagger.io
-  - name: Author
-    description: Operations about author
-    externalDocs:
-      description: Find out more
-      url: http://swagger.io
+    description: Operations about retrieve github repositories list
+  - name: João Roberto de França Pereira
+    description: Backend Developer (Java/Kotlin)
 
 paths:
   /repositories:
@@ -51,12 +45,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
 
 components:
   schemas:

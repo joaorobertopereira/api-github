@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pt.com.cocus</groupId>
 	<artifactId>api-github</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>api-github</name>
 	<description>Backend Developer Task - Kotlin</description>
 	<properties>
@@ -124,6 +124,7 @@
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+		<finalName>app</finalName>
 		<plugins>
 
 			<plugin>
