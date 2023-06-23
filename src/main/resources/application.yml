@@ -19,11 +19,3 @@ logging:
 
 api-github:
   url: https://api.github.com
-
-#spring-doc:
-#  api-docs:
-#    path: /v3/api-docs
-#    enabled: true
-#  swagger-ui:
-#    enabled: true
-#    path: swagger/index.html
