@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'pt.com.cocus.api-github' is invalid and this project uses 'pt.com.cocus.apigithub' instead.
+[![Docker Hub Repo](https://img.shields.io/docker/pulls/joaoroberto/api-github.svg)](https://hub.docker.com/repository/docker/joaoroberto/api-github)
 
 # Getting Started
 

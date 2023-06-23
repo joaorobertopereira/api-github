@@ -1,0 +1,109 @@
+openapi: 3.0.3
+info:
+  version: "1.0.0"
+  title: "Task Backend Developer Kotlin"
+  description: "Cocus - Test"
+servers:
+  - url: 'http://localhost:8080/api/github/v1'
+tags:
+  - name: Github
+    description: Operations about retrieve github repositories list
+  - name: João Roberto de França Pereira
+    description: Backend Developer (Java/Kotlin)
+
+paths:
+  /repositories:
+    get:
+      tags:
+        - repository
+      summary: Get repository list from github
+      description: repository list
+      operationId: getAllRepoList
+      parameters:
+        - name: username
+          in: header
+          description: 'username from github'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: return successfully
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ModelApiResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '406':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  schemas:
+
+    Owner:
+      type: object
+      properties:
+        login:
+          type: string
+
+    RepoResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        owner:
+          $ref: "#/components/schemas/Owner"
+        fork:
+          type: boolean
+
+    Commit:
+      type: object
+      properties:
+        sha:
+          type: string
+
+    BranchResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        commit:
+          $ref: "#/components/schemas/Commit"
+
+    Repository:
+      type: object
+      properties:
+        name:
+          type: string
+        login:
+          type: string
+        branches:
+          type: array
+          items:
+            $ref: "#/components/schemas/BranchResponse"
+
+    ModelApiResponse:
+      type: object
+      properties:
+        repositories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Repository'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string

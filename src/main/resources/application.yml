@@ -1,2 +1,21 @@
+spring:
+  application:
+    title: api-github
+    version: 2023.01
+  mustache:
+    check-template-location: false
+
 server:
   port: 8080
+
+logging:
+  level:
+    root: info
+    pt:
+      com:
+        cocus:
+          apigithub:
+            service: debug
+
+api-github:
+  url: https://api.github.com

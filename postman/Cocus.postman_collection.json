@@ -1,0 +1,42 @@
+{
+	"info": {
+		"_postman_id": "1232e98c-f2bf-4c74-90b4-fc10af0e17c0",
+		"name": "Cocus",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2251792"
+	},
+	"item": [
+		{
+			"name": "Get User Repo List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "username",
+						"value": "joaorobertopereira",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/github/v1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"github",
+						"v1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
