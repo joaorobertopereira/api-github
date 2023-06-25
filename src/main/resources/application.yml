@@ -19,3 +19,9 @@ logging:
 
 api-github:
   url: https://api.github.com
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
