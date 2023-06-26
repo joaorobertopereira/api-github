@@ -16,6 +16,7 @@ pipeline {
         // Install the Maven version configured as "M3" and add it to the path.
         maven 'M3'
         jdk 'Java17'
+        docker 'Docker'
     }
 
     stages {
@@ -24,7 +25,7 @@ pipeline {
         stage('Logging into AWS ECR') {
             steps {
                 script {
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                sh "/usr/local/bin/aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                 }
             }
         }
