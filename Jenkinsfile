@@ -37,9 +37,11 @@ pipeline {
 
         //Docker Compose Build
         stage('Docker Compose Build') {
-            steps {
-                sh 'docker-compose build'
-            }
+            step([
+                    $class: 'DockerComposeBuilder',
+                    dockerComposeFile: 'docker-compose.yml',
+                    option: [$class: 'StartService', scale:1, service:'api-github'],
+                    useCustomDockerComposeFile: true])
         }
 
         //Tag and push image to Amazon ECR
