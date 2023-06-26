@@ -47,15 +47,16 @@ pipeline {
 
         //Tag and push image to Amazon ECR
         stage('Tag and push image to Amazon ECR') {
-            agent any
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                        withAWS(credentials: 'aws-access', region: "${AWS_DEFAULT_REGION}") {
+                            sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                            sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
 
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                            sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                            sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                        }
                     }
                 }
             }
