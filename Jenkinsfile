@@ -60,7 +60,7 @@ pipeline {
              */
 
                 withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                          sh 'docker login -u AWS -p $(aws get-login-password --region us-east-1) 745703739258.dkr.ecr.us-east-1.amazonaws.com'
+                          sh 'docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 745703739258.dkr.ecr.us-east-1.amazonaws.com'
                           sh 'docker build -t api-github-ecr .'
                           sh 'docker tag api-github-ecr:latest 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest'
                           sh 'docker push 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest'
