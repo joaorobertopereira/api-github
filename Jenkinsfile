@@ -50,7 +50,7 @@ pipeline {
         stage('Tag and push image to Amazon ECR') {
             steps {
                 script {
-                    docker.withRegistry("https://${AWS_ECR_URL}", 'api-github-ecr:us-east-1:aws-access') {
+                    docker.withRegistry("https://${AWS_ECR_IMAGE_REPO_URL}", 'aws-access') {
                         app.push("${BUILD_NUMBER}")
                         app.push("latest")
                     }
