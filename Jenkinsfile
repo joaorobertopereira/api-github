@@ -9,6 +9,8 @@ pipeline {
     }
 
     environment {
+        POM_VERSION = getVersion()
+        JAR_NAME = getJarName()
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
         AWS_ECR_IMAGE_REPO_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr'
         AWS_DEFAULT_REGION = 'us-east-1'
@@ -37,11 +39,11 @@ pipeline {
 
         //Docker Compose Build
         stage('Docker Compose Build') {
-            step([
-                    $class: 'DockerComposeBuilder',
-                    dockerComposeFile: 'docker-compose.yml',
-                    option: [$class: 'StartService', scale:1, service:'api-github'],
-                    useCustomDockerComposeFile: true])
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
+                script {
+                    docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
+                }
+            }
         }
 
         //Tag and push image to Amazon ECR
@@ -87,6 +89,22 @@ pipeline {
             }
         }
     }
+}
+
+def getJarName() {
+    def jarName = getName() + '-' + getVersion() + '.jar'
+    echo "jarName: ${jarName}"
+    return  jarName
+}
+
+def getVersion() {
+    def pom = readMavenPom file: './pom.xml'
+    return pom.version
+}
+
+def getName() {
+    def pom = readMavenPom file: './pom.xml'
+    return pom.name
 }
 
 def updateContainerDefinitionJsonWithImageVersion() {
