@@ -41,7 +41,7 @@ pipeline {
         stage('Docker Compose Build') {
             steps {
                 script {
-                    docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
+                    sh "docker-compose build"
                 }
             }
         }
