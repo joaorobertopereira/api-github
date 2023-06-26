@@ -24,9 +24,7 @@ pipeline {
         //Build Application Jar
         stage('Build Application Jar') {
             steps {
-                withMaven(options: [artifactsPublisher(), mavenLinkerPublisher(), dependenciesFingerprintPublisher(disabled: true), jacocoPublisher(disabled: true), junitPublisher(disabled: true)]) {
-                    sh "mvn clean package -DskipTests -f pom.xml"
-                }
+                sh "mvn clean package -DskipTests -f pom.xml"
             }
         }
 
