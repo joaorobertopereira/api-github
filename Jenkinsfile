@@ -25,7 +25,6 @@ pipeline {
         // Install the Maven version configured as "M3" and add it to the path.
         maven 'M3'
         jdk 'Java17'
-        dockerTool 'Docker'
     }
 
     stages {
