@@ -40,10 +40,8 @@ pipeline {
         //Docker Compose Build
         stage('Docker Compose Build') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-access', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                    script {
-                        docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
-                    }
+                script {
+                    docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
                 }
             }
         }
