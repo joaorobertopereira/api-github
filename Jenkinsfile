@@ -10,6 +10,13 @@ pipeline {
 
     environment {
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
+        AWS_ECR_IMAGE_REPO_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr'
+        AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_TASK_DEFINITION_NAME = 'ApiGitHubTaskDefinition'
+        AWS_SERVICE_NAME = 'ApiGithubService'
+        AWS_CLUSTER_NAME = 'ApiGithubCluster'
+        AWS_CONTAINER_NAME = 'ApiGithubContainer'
+        DOCKER_USERNAME = 'joaoroberto'
     }
 
     tools {
@@ -31,7 +38,7 @@ pipeline {
         //Docker Compose Build
         stage('Docker Compose Build') {
             steps {
-                sh 'docker compose build '
+                sh 'docker compose build'
             }
         }
 
@@ -39,14 +46,12 @@ pipeline {
         stage('Tag and push image to Amazon ECR') {
             agent any
             steps {
-                withCredentials([string(credentialsId: 'api-github-aws', variable: 'ECR_IMAGE_REPO_URL')]) {
-                    withAWS(region: "${AWS_DEFAULT_REGION}", credentials: 'api-github-aws') {
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${ECR_IMAGE_REPO_URL}:latest"
+                withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+                    sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                    sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
 
-                        sh "docker push ${ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker push ${ECR_IMAGE_REPO_URL}:latest"
-                    }
+                    sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                    sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
                 }
             }
         }
@@ -54,21 +59,20 @@ pipeline {
         //Deploy Amazon ECS task definition
         stage('Deploy Amazon ECS task definition') {
             steps {
-                withCredentials([string(credentialsId: 'AWS_EXECUTION_ROL_SECRET', variable: 'AWS_ECS_EXECUTION_ROL'),string(credentialsId: 'AWS_REPOSITORY_URL_SECRET', variable: 'AWS_ECR_URL')]) {
-                    script {
-                        updateContainerDefinitionJsonWithImageVersion()
-                        //sh("aws ecs register-task-definition --region ${AWS_ECR_REGION} --family ${AWS_ECS_TASK_DEFINITION} --execution-role-arn ${AWS_ECS_EXECUTION_ROL} --requires-compatibilities ${AWS_ECS_COMPATIBILITY} --network-mode ${AWS_ECS_NETWORK_MODE} --cpu ${AWS_ECS_CPU} --memory ${AWS_ECS_MEMORY} --container-definitions file://${AWS_ECS_TASK_DEFINITION_PATH}")
-                        def taskRevision = sh(script: "aws ecs describe-task-definition --task-definition ${TASK_DEFINITION} --query taskDefinition | egrep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
-                        sh("aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_DEFINITION}:${taskRevision}")
-                    }
+            withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+                script {
+                    updateContainerDefinitionJsonWithImageVersion()
+                    def taskRevision = sh(script: "aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition | egrep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
+                    sh("aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${taskRevision}")
                 }
             }
         }
+
         //Push to Docker Hub Container registry
         stage('Push to Docker Hub Container registry') {
             agent any
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-access', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
 
                     sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${DOCKER_USERNAME}/api-github:${BUILD_NUMBER}"
@@ -82,7 +86,7 @@ pipeline {
 
 def updateContainerDefinitionJsonWithImageVersion() {
     def containerDefinitionJson = readJSON file: AWS_ECS_TASK_DEFINITION_PATH, returnPojo: true
-    containerDefinitionJson[0]['image'] = "${ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}".inspect()
+    containerDefinitionJson[0]['image'] = "${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}".inspect()
     echo "task definiton json: ${containerDefinitionJson}"
     writeJSON file: AWS_ECS_TASK_DEFINITION_PATH, json: containerDefinitionJson
 }
