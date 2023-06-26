@@ -12,6 +12,7 @@ pipeline {
         POM_VERSION = getVersion()
         JAR_NAME = getJarName()
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
+        AWS_ECR_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com'
         AWS_ECR_IMAGE_REPO_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr'
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_TASK_DEFINITION_NAME = 'ApiGitHubTaskDefinition'
@@ -49,6 +50,11 @@ pipeline {
         stage('Tag and push image to Amazon ECR') {
             steps {
                 script {
+                    docker.withRegistry("https://${AWS_ECR_URL}", 'api-github-ecr:us-east-1:aws-access') {
+                        app.push("${BUILD_NUMBER}")
+                        app.push("latest")
+                    }
+/*
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
                         withAWS(credentials: 'aws-access', region: "${AWS_DEFAULT_REGION}") {
                             sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
@@ -58,6 +64,7 @@ pipeline {
                             sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
                         }
                     }
+ */
                 }
             }
         }
