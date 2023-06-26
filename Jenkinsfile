@@ -46,12 +46,14 @@ pipeline {
         stage('Tag and push image to Amazon ECR') {
             agent any
             steps {
-                withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
-                    sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                    sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
+                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
 
-                    sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                    sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
+                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                    }
                 }
             }
         }
@@ -59,11 +61,12 @@ pipeline {
         //Deploy Amazon ECS task definition
         stage('Deploy Amazon ECS task definition') {
             steps {
-            withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
                 script {
-                    updateContainerDefinitionJsonWithImageVersion()
-                    def taskRevision = sh(script: "aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition | egrep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
-                    sh("aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${taskRevision}")
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
+                        updateContainerDefinitionJsonWithImageVersion()
+                        def taskRevision = sh(script: "aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition | egrep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
+                        sh("aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${taskRevision}")
+                    }
                 }
             }
         }
