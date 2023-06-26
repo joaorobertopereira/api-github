@@ -39,9 +39,11 @@ pipeline {
 
         //Docker Compose Build
         stage('Docker Compose Build') {
-            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
-                script {
-                    docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
+                    script {
+                        docker.build("${AWS_ECR_IMAGE_REPO_URL}:${POM_VERSION}", "--build-arg JAR_FILE=${JAR_NAME} .")
+                    }
                 }
             }
         }
