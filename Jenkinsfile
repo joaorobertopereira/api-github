@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'ecsAgent' }
+    agent { label 'ECSAgent' }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
