@@ -61,7 +61,7 @@ pipeline {
                         //updateContainerDefinitionJsonWithImageVersion()
                         taskRevision = sh(script: "aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition --region ${AWS_DEFAULT_REGION} | grep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
                         echo "Revision Number TaskDefinition: ${taskRevision}"
-                        sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${BUILD_NUMBER} --desired-count 1'
+                        sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${taskRevision} --desired-count 1'
                     }
                 }
             }
