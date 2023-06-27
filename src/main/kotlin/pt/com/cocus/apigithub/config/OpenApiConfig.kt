@@ -13,7 +13,7 @@ open class OpenApiConfig {
         return OpenAPI()
             .info(
                 Info()
-                    .title("API with Kotlin 1.8.21 and Spring Boot 2.7.13 jenkins New Task Definition")
+                    .title("API with Kotlin 1.8.21 and Spring Boot 2.7.13 jenkins New Task Definition manual")
                     .version("v1")
                     .description("Cocus Backend Kotlin Task")
 
