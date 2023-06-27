@@ -93,7 +93,7 @@ pipeline {
             }
         }
 
-        stage('Run ECS task on Fargate') {
+        stage('Run ECS task on EC2') {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
@@ -103,12 +103,13 @@ pipeline {
                                 aws ecs register-task-definition \
                                     --family ${AWS_TASK_DEFINITION_NAME} \
                                     --execution-role-arn arn:aws:iam::${env.AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole \
+                                    --network-mode awsvpc \
                                     --requires-compatibilities EC2 \
                                     --cpu '512' \
                                     --memory '512' \
                                     --container-definitions '[
                                         {
-                                            \"name\": ${AWS_CLUSTER_NAME},
+                                            \"name\": \"${AWS_CONTAINER_NAME}\",
                                             \"image\": \"${AWS_ECR_IMAGE_REPO_URL}:latest\",
                                             \"essential\": true,
                                             \"portMappings\": [
@@ -116,7 +117,15 @@ pipeline {
                                                     \"containerPort\": ${CONTAINER_PORT},
                                                     \"hostPort\": ${CONTAINER_PORT}
                                             }
-                                        ]
+                                        ],
+                                        \"logConfiguration\": {
+                                            \"logDriver\": \"awslogs\",
+                                            \"options\": {
+                                                \"awslogs-group\": \"ecs-logs\",
+                                                \"awslogs-region\": \"${env.AWS_REGION}\",
+                                                \"awslogs-stream-prefix\": \"my-container\"
+                                            }
+                                        }
                                     }
                                 ]' \
                                 --output text \
