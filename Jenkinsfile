@@ -52,19 +52,179 @@ pipeline {
             }
         }
 
-        //Deploy Amazon ECS task definition
-        stage('Deploy Amazon ECS task definition') {
+
+        stage('Create ECS task definition') {
             steps {
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
-                        sh 'aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition > ./ecs/task-definition.json'
-                        def ecsTaskDefinition = readJSON file: AWS_ECS_TASK_DEFINITION_PATH, returnPojo: true
-                        echo "Revision Number TaskDefinition: ${ecsTaskDefinition.revision}"
-                        //sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${ecsTaskDefinition.revision} --desired-count 1'
+                    def task_definition = """{
+                        \"family\": \"${AWS_TASK_DEFINITION_NAME}\",
+                        \"executionRoleArn\": \"arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole\",
+                        \"containerDefinitions\": [
+                            {
+                                \"name\": \"${AWS_CONTAINER_NAME}\",
+                                \"image\": \"${AWS_ECR_IMAGE_REPO_URL}:latest\",
+                                \"portMappings\": [
+                                    {
+                                        \"containerPort\": ${CONTAINER_PORT}
+                                    }
+                                ]
+                            }
+                        ],
+                        \"requiresCompatibilities\": [
+                            \"EC2\"
+                        ],
+                        \"cpu\": \"512\",
+                        \"memory\": \"512\"
+                    }"""
+
+                    withCredentials([
+                        [
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            credentialsId: 'aws-access',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                    ]) {
+                        def task_definition_arn = sh(
+                            script: """
+                            echo '${task_definition}' > /tmp/task.json
+                            aws ecs register-task-definition \
+                                --cli-input-json file:///tmp/task.json \
+                                --query 'taskDefinition.taskDefinitionArn' \
+                                --output text""",
+                            returnStdout: true
+                        ).trim()
+
+                        env.TASK_DEFINITION_ARN = task_definition_arn
                     }
                 }
             }
         }
+
+        stage('Run ECS task on Fargate') {
+            steps {
+                script {
+                    withCredentials([
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        credentialsId: 'aws-access',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]) {
+                        try {
+                            def task_definition_arn = sh(
+                                script: """
+                                aws ecs register-task-definition \
+                                    --family ${AWS_TASK_DEFINITION_NAME} \
+                                    --execution-role-arn arn:aws:iam::${env.AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole \
+                                    --requires-compatibilities EC2 \
+                                    --cpu '512' \
+                                    --memory '512' \
+                                    --container-definitions '[
+                                        {
+                                            \"name\": ${AWS_CLUSTER_NAME},
+                                            \"image\": \"${ecr_repository_url}:latest\",
+                                            \"essential\": true,
+                                            \"portMappings\": [
+                                                {
+                                                    \"containerPort\": ${CONTAINER_PORT},
+                                                    \"hostPort\": ${CONTAINER_PORT}
+                                            }
+                                        ]
+                                    }
+                                ]' \
+                                --output text \
+                                --query 'taskDefinition.taskDefinitionArn'""",
+                            returnStdout: true
+                        ).trim()
+
+                            echo "Task definition created: ${task_definition_arn}"
+
+                            // Create a Fargate task
+                            def task_response = sh(
+                                script: """
+                                aws ecs run-task \
+                                    --cluster ${AWS_CLUSTER_NAME} \
+                                    --launch-type FARGATE \
+                                    --task-definition ${task_definition_arn} \
+                                    --output json""",
+                                returnStdout: true
+                            ).trim()
+
+                            def task_id = sh(
+                                script: "echo '${task_response}' | jq -r '.tasks[0].taskArn' | cut -d/ -f2",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "Fargate task started: ${task_id}"
+
+                            // Wait for the task to start running
+                            timeout(time: 5, unit: 'MINUTES') {
+                                def task_status = sh(
+                                    script: """
+                                    aws ecs describe-tasks \
+                                        --cluster ${AWS_CLUSTER_NAME} \
+                                        --tasks ${task_id} \
+                                        --query 'tasks[0].lastStatus' \
+                                        --output text""",
+                                    returnStdout: true
+                                ).trim()
+
+                                if (task_status != 'RUNNING') {
+                                    error "Fargate task failed to start: ${task_status}"
+                                }
+                            }
+
+                            // Get the public IP address of the task
+                            def task_response_json = readJSON text: task_response
+                            def eni_id = task_response_json.tasks[0].attachments[0].details.find { it.name == 'networkInterfaceId' }?.value
+                            def public_ip = sh(
+                                script: """
+                                aws ec2 describe-network-interfaces \
+                                    --network-interface-ids ${eni_id} \
+                                    --query 'NetworkInterfaces[0].Association.PublicIp' \
+                                    --output text""",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "Task public IP: ${public_ip}"
+
+                            /* Commented out: Terminate the task
+
+                                // Terminate the task
+                            sh(
+                                script: """
+                                aws ecs stop-task \
+                                    --cluster ${AWS_CLUSTER_NAME} \
+                                    --task ${task_id} \
+                                    --output text \
+                                    --query 'task.taskArn'""",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "Fargate task terminated: ${task_id}"
+                            */
+
+                        } catch (Exception e) {
+                            error "Failed to run Fargate task: ${e.message}"
+                        }
+                    }
+                }
+            }
+        }
+
+//         //Deploy Amazon ECS task definition
+//         stage('Deploy Amazon ECS task definition') {
+//             steps {
+//                 script {
+//                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
+//                         sh 'aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition > ./ecs/task-definition.json'
+//                         def ecsTaskDefinition = readJSON file: AWS_ECS_TASK_DEFINITION_PATH, returnPojo: true
+//                         echo "Revision Number TaskDefinition: ${ecsTaskDefinition.revision}"
+//                         //sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${ecsTaskDefinition.revision} --desired-count 1'
+//                     }
+//                 }
+//             }
+//         }
 
         //Push to Docker Hub Container registry
         stage('Push to Docker Hub Container registry') {
