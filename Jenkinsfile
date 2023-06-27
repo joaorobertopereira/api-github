@@ -58,14 +58,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
-                        //updateContainerDefinitionJsonWithImageVersion()
-                        //taskRevision = sh(script: "aws ecs describe-task-definition --task-definition  --query taskDefinition --region ${AWS_DEFAULT_REGION} | grep \"revision\" | tr \"/\" \" \" | awk '{print \$2}' | sed 's/\"\$//'", returnStdout: true)
-
-                        //ecsTaskDefinition = sh(returnStdout: true, script: "aws ecs list-task-definitions | grep -o ${AWS_TASK_DEFINITION_NAME} ").trim()
                         sh 'aws ecs describe-task-definition --task-definition ${AWS_TASK_DEFINITION_NAME} --query taskDefinition > ./ecs/task-definition.json'
                         def ecsTaskDefinition = readJSON file: AWS_ECS_TASK_DEFINITION_PATH, returnPojo: true
                         echo "Revision Number TaskDefinition: ${ecsTaskDefinition.revision}"
-                        sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${ecsTaskDefinition.revision} --desired-count 1'
+                        //sh 'aws ecs update-service --cluster ${AWS_CLUSTER_NAME} --service ${AWS_SERVICE_NAME} --task-definition ${AWS_TASK_DEFINITION_NAME}:${ecsTaskDefinition.revision} --desired-count 1'
                     }
                 }
             }
@@ -100,12 +96,4 @@ def getVersion() {
 def getName() {
     def pom = readMavenPom file: './pom.xml'
     return pom.name
-}
-
-def updateContainerDefinitionJsonWithImageVersion() {
-    sh 'aws ecs describe-task-definition --task-definition ${{ secrets.TASK_DEFINITION }} --query taskDefinition > ./ecs/task-definition.json'
-    def containerDefinitionJson = readJSON file: AWS_ECS_TASK_DEFINITION_PATH, returnPojo: true
-    containerDefinitionJson.revision = "${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}".inspect()
-    echo "task definiton json: ${containerDefinitionJson}"
-    writeJSON file: AWS_ECS_TASK_DEFINITION_PATH, json: containerDefinitionJson
 }
