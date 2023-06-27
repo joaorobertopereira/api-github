@@ -102,7 +102,7 @@ pipeline {
                                 script: """
                                 aws ecs register-task-definition \
                                     --family ${AWS_TASK_DEFINITION_NAME} \
-                                    --execution-role-arn arn:aws:iam::${env.AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole \
+                                    --execution-role-arn arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole \
                                     --network-mode awsvpc \
                                     --requires-compatibilities EC2 \
                                     --cpu '512' \
@@ -122,7 +122,7 @@ pipeline {
                                             \"logDriver\": \"awslogs\",
                                             \"options\": {
                                                 \"awslogs-group\": \"ecs-logs\",
-                                                \"awslogs-region\": \"${env.AWS_REGION}\",
+                                                \"awslogs-region\": \"${AWS_DEFAULT_REGION}\",
                                                 \"awslogs-stream-prefix\": \"my-container\"
                                             }
                                         }
