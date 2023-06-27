@@ -9,7 +9,12 @@ pipeline {
     }
 
     environment {
+        POM_VERSION = getVersion()
+        JAR_NAME = getJarName()
+        AWS_ACCESS_KEY_ID = 'AKIA23H3IB55JCDW27N4'
+        AWS_SECRET_ACCESS_KEY = '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'
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
+        AWS_ECR_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com'
         AWS_ECR_IMAGE_REPO_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr'
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_TASK_DEFINITION_NAME = 'ApiGitHubTaskDefinition'
@@ -23,7 +28,6 @@ pipeline {
         // Install the Maven version configured as "M3" and add it to the path.
         maven 'M3'
         jdk 'Java17'
-        dockerTool 'Docker'
     }
 
     stages {
@@ -38,24 +42,29 @@ pipeline {
         //Docker Compose Build
         stage('Docker Compose Build') {
             steps {
-                sh 'docker compose build'
+                script {
+                    sh "docker-compose build"
+                }
             }
         }
 
         //Tag and push image to Amazon ECR
         stage('Tag and push image to Amazon ECR') {
-            agent any
             steps {
-                script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
+            /*
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 745703739258.dkr.ecr.us-east-1.amazonaws.com
+                docker build -t api-github-ecr .
+                docker tag api-github-ecr:latest 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest
+                docker push 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest
 
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
-                    }
-                }
-            }
+             */
+
+                withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
+                          sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 745703739258.dkr.ecr.us-east-1.amazonaws.com'
+                          sh 'docker build -t api-github-ecr .'
+                          sh 'docker tag api-github-ecr:latest 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest'
+                          sh 'docker push 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest'
+                         }            }
         }
 
         //Deploy Amazon ECS task definition
@@ -85,6 +94,22 @@ pipeline {
             }
         }
     }
+}
+
+def getJarName() {
+    def jarName = getName() + '-' + getVersion() + '.jar'
+    echo "jarName: ${jarName}"
+    return  jarName
+}
+
+def getVersion() {
+    def pom = readMavenPom file: './pom.xml'
+    return pom.version
+}
+
+def getName() {
+    def pom = readMavenPom file: './pom.xml'
+    return pom.name
 }
 
 def updateContainerDefinitionJsonWithImageVersion() {
