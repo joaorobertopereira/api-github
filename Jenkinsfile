@@ -11,17 +11,7 @@ pipeline {
     environment {
         POM_VERSION = getVersion()
         JAR_NAME = getJarName()
-        AWS_ACCESS_KEY_ID = 'AKIA23H3IB55JCDW27N4'
-        AWS_SECRET_ACCESS_KEY = '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'
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
-        AWS_ECR_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com'
-        AWS_ECR_IMAGE_REPO_URL = '745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr'
-        AWS_DEFAULT_REGION = 'us-east-1'
-        AWS_TASK_DEFINITION_NAME = 'ApiGitHubTaskDefinition'
-        AWS_SERVICE_NAME = 'ApiGithubService'
-        AWS_CLUSTER_NAME = 'ApiGithubCluster'
-        AWS_CONTAINER_NAME = 'ApiGithubContainer'
-        DOCKER_USERNAME = 'joaoroberto'
     }
 
     tools {
@@ -51,25 +41,16 @@ pipeline {
         //Tag and push image to Amazon ECR
         stage('Tag and push image to Amazon ECR') {
             steps {
-            /*
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 745703739258.dkr.ecr.us-east-1.amazonaws.com
-                docker build -t api-github-ecr .
-                docker tag api-github-ecr:latest 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest
-                docker push 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest
-
-             */
-
                 withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                          sh "docker login --username AWS --password-stdin $(aws ecr get-login-password --region ${env.AWS_DEFAULT_REGION}) ${env.AWS_ECR_URL}"
-                          sh "docker tag ${env.DOCKER_USERNAME}/api-github:latest ${env.AWS_ECR_IMAGE_REPO_URL}:${env.BUILD_NUMBER}"
-                          sh "docker tag ${env.DOCKER_USERNAME}/api-github:latest ${env.AWS_ECR_IMAGE_REPO_URL}:latest"
-
-                          sh "docker push ${env.AWS_ECR_IMAGE_REPO_URL}:${env.BUILD_NUMBER}"
-                          sh "docker push ${env.AWS_ECR_IMAGE_REPO_URL}:latest"
-                         }
+                    sh "docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 745703739258.dkr.ecr.us-east-1.amazonaws.com"
+                    //sh 'docker build -t api-github-ecr .'
+                    sh "docker tag api-github-ecr:latest 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest"
+                    sh "docker push 745703739258.dkr.ecr.us-east-1.amazonaws.com/api-github-ecr:latest"
+                }
             }
         }
 
+/*
         //Deploy Amazon ECS task definition
         stage('Deploy Amazon ECS task definition') {
             steps {
@@ -82,6 +63,7 @@ pipeline {
                 }
             }
         }
+ */
 
         //Push to Docker Hub Container registry
         stage('Push to Docker Hub Container registry') {
