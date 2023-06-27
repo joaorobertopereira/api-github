@@ -43,11 +43,11 @@ pipeline {
             steps {
                 withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"]) {
                     script {
-                        sh 'docker login --username AWS --password-stdin $(aws ecr get-login-password --region us-east-1) 745703739258.dkr.ecr.us-east-1.amazonaws.com'
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                        sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                        sh 'docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_DEFAULT_REGION}) ${AWS_ECR_URL}'
+                        sh 'docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}'
+                        sh 'docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest'
+                        sh 'docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}'
+                        sh 'docker push ${AWS_ECR_IMAGE_REPO_URL}:latest'
                     }
                 }
             }
@@ -72,7 +72,7 @@ pipeline {
         stage('Push to Docker Hub Container registry') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-access', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                    sh "docker login --username ${env.dockerHubUser} --password-stdin ${env.dockerHubPassword}"
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
 
                     sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${DOCKER_USERNAME}/api-github:${BUILD_NUMBER}"
                     sh "docker push ${DOCKER_USERNAME}/api-github:${BUILD_NUMBER}"
