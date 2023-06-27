@@ -135,12 +135,12 @@ pipeline {
 
                             echo "Task definition created: ${task_definition_arn}"
 
-                            // Create a Fargate task
+                            // Create a EC2 task
                             def task_response = sh(
                                 script: """
                                 aws ecs run-task \
                                     --cluster ${AWS_CLUSTER_NAME} \
-                                    --launch-type FARGATE \
+                                    --launch-type EC2 \
                                     --task-definition ${task_definition_arn} \
                                     --output json""",
                                 returnStdout: true
@@ -151,7 +151,7 @@ pipeline {
                                 returnStdout: true
                             ).trim()
 
-                            echo "Fargate task started: ${task_id}"
+                            echo "EC2 task started: ${task_id}"
 
                             // Wait for the task to start running
                             timeout(time: 5, unit: 'MINUTES') {
@@ -166,7 +166,7 @@ pipeline {
                                 ).trim()
 
                                 if (task_status != 'RUNNING') {
-                                    error "Fargate task failed to start: ${task_status}"
+                                    error "EC2 task failed to start: ${task_status}"
                                 }
                             }
 
@@ -197,11 +197,11 @@ pipeline {
                                 returnStdout: true
                             ).trim()
 
-                            echo "Fargate task terminated: ${task_id}"
+                            echo "EC2 task terminated: ${task_id}"
                             */
 
                         } catch (Exception e) {
-                            error "Failed to run Fargate task: ${e.message}"
+                            error "Failed to run EC2 task: ${e.message}"
                         }
                     }
                 }
