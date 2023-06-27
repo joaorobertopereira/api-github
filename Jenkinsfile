@@ -76,15 +76,7 @@ pipeline {
                         \"cpu\": \"512\",
                         \"memory\": \"512\"
                     }"""
-
-                    withCredentials([
-                        [
-                            $class: 'AmazonWebServicesCredentialsBinding',
-                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                            credentialsId: 'aws-access',
-                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                        ]
-                    ]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
                         def task_definition_arn = sh(
                             script: """
                             echo '${task_definition}' > /tmp/task.json
@@ -104,12 +96,7 @@ pipeline {
         stage('Run ECS task on Fargate') {
             steps {
                 script {
-                    withCredentials([
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        credentialsId: 'aws-access',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
                         try {
                             def task_definition_arn = sh(
                                 script: """
