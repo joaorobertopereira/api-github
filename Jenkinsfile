@@ -9,8 +9,6 @@ pipeline {
     }
 
     environment {
-        POM_VERSION = getVersion()
-        JAR_NAME = getJarName()
         AWS_ECS_TASK_DEFINITION_PATH = './ecs/task-definition.json'
     }
 
@@ -33,6 +31,7 @@ pipeline {
         stage('Docker Compose Build') {
             steps {
                 script {
+                    sh "docker system prune -a"
                     sh "docker-compose build"
                 }
             }
@@ -80,20 +79,4 @@ pipeline {
             }
         }
     }
-}
-
-def getJarName() {
-    def jarName = getName() + '-' + getVersion() + '.jar'
-    echo "jarName: ${jarName}"
-    return  jarName
-}
-
-def getVersion() {
-    def pom = readMavenPom file: './pom.xml'
-    return pom.version
-}
-
-def getName() {
-    def pom = readMavenPom file: './pom.xml'
-    return pom.name
 }
