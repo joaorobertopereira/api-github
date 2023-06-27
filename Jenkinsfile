@@ -109,7 +109,7 @@ pipeline {
                                     --container-definitions '[
                                         {
                                             \"name\": ${AWS_CLUSTER_NAME},
-                                            \"image\": \"${ecr_repository_url}:latest\",
+                                            \"image\": \"${AWS_ECR_IMAGE_REPO_URL}:latest\",
                                             \"essential\": true,
                                             \"portMappings\": [
                                                 {
