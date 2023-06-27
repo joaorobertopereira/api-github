@@ -60,12 +60,12 @@ pipeline {
              */
 
                 withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                          sh "docker login --username AWS --password-stdin $(aws ecr get-login-password --region ${env.AWS_DEFAULT_REGION}) ${AWS_ECR_URL}"
-                          sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                          sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                          sh "docker login --username AWS --password-stdin $(aws ecr get-login-password --region ${env.AWS_DEFAULT_REGION}) ${env.AWS_ECR_URL}"
+                          sh "docker tag ${env.DOCKER_USERNAME}/api-github:latest ${env.AWS_ECR_IMAGE_REPO_URL}:${env.BUILD_NUMBER}"
+                          sh "docker tag ${env.DOCKER_USERNAME}/api-github:latest ${env.AWS_ECR_IMAGE_REPO_URL}:latest"
 
-                          sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}"
-                          sh "docker push ${AWS_ECR_IMAGE_REPO_URL}:latest"
+                          sh "docker push ${env.AWS_ECR_IMAGE_REPO_URL}:${env.BUILD_NUMBER}"
+                          sh "docker push ${env.AWS_ECR_IMAGE_REPO_URL}:latest"
                          }
             }
         }
