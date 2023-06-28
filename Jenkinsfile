@@ -73,8 +73,8 @@ pipeline {
                         \"requiresCompatibilities\": [
                             \"EC2\"
                         ],
-                        \"cpu\": \"512\",
-                        \"memory\": \"512\"
+                        \"cpu\": \"1024\",
+                        \"memory\": \"2048\"
                     }"""
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
                         def task_definition_arn = sh(
@@ -104,8 +104,8 @@ pipeline {
                                     --family ${AWS_TASK_DEFINITION_NAME} \
                                     --execution-role-arn arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole \
                                     --requires-compatibilities EC2 \
-                                    --cpu '512' \
-                                    --memory '512' \
+                                    --cpu '1024' \
+                                    --memory '2048' \
                                     --container-definitions '[
                                         {
                                             \"name\": \"${AWS_CONTAINER_NAME}\",
