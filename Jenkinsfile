@@ -70,7 +70,7 @@ pipeline {
                                         \"hostPort\": ${CONTAINER_PORT},
                                         \"protocol\": \"tcp\"
                                     }
-                                ]
+                                ],
                                 \"essential\": true,
                                 \"environment\": [],
                                 \"mountPoints\": [],
