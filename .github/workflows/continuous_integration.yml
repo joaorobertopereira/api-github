@@ -49,8 +49,7 @@ jobs:
         docker push ${{ secrets.ECR_IMAGE_REPO_URL }}:latest
 
     - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition ${{ secrets.TASK_DEFINITION }} --query taskDefinition > task-definition.json
+      run: aws ecs describe-task-definition --task-definition ${{ secrets.TASK_DEFINITION }} --query taskDefinition > task-definition.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -69,5 +68,4 @@ jobs:
         wait-for-service-stability: true
 
     - name: Push to Docker Hub Container registry
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/api-github:latest
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/api-github:latest
