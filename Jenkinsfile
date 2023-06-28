@@ -123,15 +123,7 @@ pipeline {
                                                     \"hostPort\": ${CONTAINER_PORT},
                                                     \"protocol\": \"tcp\"
                                             }
-                                        ],
-                                        \"logConfiguration\": {
-                                            \"logDriver\": \"awslogs\",
-                                            \"options\": {
-                                                \"awslogs-group\": \"ecs-logs\",
-                                                \"awslogs-region\": \"${AWS_DEFAULT_REGION}\",
-                                                \"awslogs-stream-prefix\": \"my-container\"
-                                            }
-                                        }
+                                        ]
                                     }
                                 ]' \
                                 --output text \
