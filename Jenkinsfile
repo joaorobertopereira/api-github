@@ -140,55 +140,55 @@ pipeline {
                         ).trim()
 
                             echo "Task definition created: ${task_definition_arn}"
-
-                            // Create a EC2 task
-                            def task_response = sh(
-                                script: """
-                                aws ecs run-task \
-                                    --cluster ${AWS_CLUSTER_NAME} \
-                                    --launch-type EC2 \
-                                    --task-definition ${task_definition_arn} \
-                                    --output json""",
-                                returnStdout: true
-                            ).trim()
-
-                            def task_id = sh(
-                                script: "echo '${task_response}' | jq -r '.tasks[0].taskArn' | cut -d/ -f2",
-                                returnStdout: true
-                            ).trim()
-
-                            echo "EC2 task started: ${task_id}"
+//
+//                             // Create a EC2 task
+//                             def task_response = sh(
+//                                 script: """
+//                                 aws ecs run-task \
+//                                     --cluster ${AWS_CLUSTER_NAME} \
+//                                     --launch-type EC2 \
+//                                     --task-definition ${task_definition_arn} \
+//                                     --output json""",
+//                                 returnStdout: true
+//                             ).trim()
+//
+//                             def task_id = sh(
+//                                 script: "echo '${task_response}' | jq -r '.tasks[0].taskArn' | cut -d/ -f2",
+//                                 returnStdout: true
+//                             ).trim()
+//
+//                             echo "EC2 task started: ${task_id}"
 
                             // Wait for the task to start running
-                            timeout(time: 5, unit: 'MINUTES') {
-                                def task_status = sh(
-                                    script: """
-                                    aws ecs describe-tasks \
-                                        --cluster ${AWS_CLUSTER_NAME} \
-                                        --tasks ${task_id} \
-                                        --query 'tasks[0].lastStatus' \
-                                        --output text""",
-                                    returnStdout: true
-                                ).trim()
+//                             timeout(time: 5, unit: 'MINUTES') {
+//                                 def task_status = sh(
+//                                     script: """
+//                                     aws ecs describe-tasks \
+//                                         --cluster ${AWS_CLUSTER_NAME} \
+//                                         --tasks ${task_id} \
+//                                         --query 'tasks[0].lastStatus' \
+//                                         --output text""",
+//                                     returnStdout: true
+//                                 ).trim()
+//
+//                                 if (task_status != 'RUNNING') {
+//                                     error "EC2 task failed to start: ${task_status}"
+//                                 }
+//                             }
 
-                                if (task_status != 'RUNNING') {
-                                    error "EC2 task failed to start: ${task_status}"
-                                }
-                            }
-
-                            // Get the public IP address of the task
-                            def task_response_json = readJSON text: task_response
-                            def eni_id = task_response_json.tasks[0].attachments[0].details.find { it.name == 'networkInterfaceId' }?.value
-                            def public_ip = sh(
-                                script: """
-                                aws ec2 describe-network-interfaces \
-                                    --network-interface-ids ${eni_id} \
-                                    --query 'NetworkInterfaces[0].Association.PublicIp' \
-                                    --output text""",
-                                returnStdout: true
-                            ).trim()
-
-                            echo "Task public IP: ${public_ip}"
+//                             // Get the public IP address of the task
+//                             def task_response_json = readJSON text: task_response
+//                             def eni_id = task_response_json.tasks[0].attachments[0].details.find { it.name == 'networkInterfaceId' }?.value
+//                             def public_ip = sh(
+//                                 script: """
+//                                 aws ec2 describe-network-interfaces \
+//                                     --network-interface-ids ${eni_id} \
+//                                     --query 'NetworkInterfaces[0].Association.PublicIp' \
+//                                     --output text""",
+//                                 returnStdout: true
+//                             ).trim()
+//
+//                             echo "Task public IP: ${public_ip}"
 
                             /* Commented out: Terminate the task
 
