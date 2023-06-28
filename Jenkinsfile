@@ -60,9 +60,9 @@ pipeline {
                             {
                                 \"name\": \"${AWS_CONTAINER_NAME}\",
                                 \"image\": \"${AWS_ECR_IMAGE_REPO_URL}:latest\",
-                                \"cpu\": \"0\",
-                                \"memory\": \"512\",
-                                \"memoryReservation\": \"512\",
+                                \"cpu\": 0,
+                                \"memory\": 512,
+                                \"memoryReservation\": 512,
 
                                 \"portMappings\": [
                                     {
