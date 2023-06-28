@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(numToKeepStr: '1'))
         disableConcurrentBuilds()
         timeout(time: 1, unit: 'HOURS')
         timestamps()
@@ -43,9 +43,7 @@ pipeline {
                 withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"]) {
                     script {
                         sh 'docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_DEFAULT_REGION}) ${AWS_ECR_URL}'
-                        sh 'docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}'
                         sh 'docker tag ${DOCKER_USERNAME}/api-github:latest ${AWS_ECR_IMAGE_REPO_URL}:latest'
-                        sh 'docker push ${AWS_ECR_IMAGE_REPO_URL}:${BUILD_NUMBER}'
                         sh 'docker push ${AWS_ECR_IMAGE_REPO_URL}:latest'
                     }
                 }
@@ -58,22 +56,31 @@ pipeline {
                 script {
                     def task_definition = """{
                         \"family\": \"${AWS_TASK_DEFINITION_NAME}\",
-                        \"executionRoleArn\": \"arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole\",
                         \"containerDefinitions\": [
                             {
                                 \"name\": \"${AWS_CONTAINER_NAME}\",
                                 \"image\": \"${AWS_ECR_IMAGE_REPO_URL}:latest\",
+                                \"cpu\": \"0\",
+                                \"memory\": \"512\",
+                                \"memoryReservation\": \"512\",
+
                                 \"portMappings\": [
                                     {
-                                        \"containerPort\": ${CONTAINER_PORT}
+                                        \"containerPort\": ${CONTAINER_PORT},
+                                        \"hostPort\": ${CONTAINER_PORT},
+                                        \"protocol\": \"tcp\"
                                     }
                                 ]
+                                \"essential\": true,
+                                \"environment\": [],
+                                \"mountPoints\": [],
+                                \"volumesFrom\": []
                             }
                         ],
                         \"requiresCompatibilities\": [
                             \"EC2\"
                         ],
-                        \"cpu\": \"512\",
+                        \"cpu\": \"256\",
                         \"memory\": \"512\"
                     }"""
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
@@ -102,9 +109,8 @@ pipeline {
                                 script: """
                                 aws ecs register-task-definition \
                                     --family ${AWS_TASK_DEFINITION_NAME} \
-                                    --execution-role-arn arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole \
                                     --requires-compatibilities EC2 \
-                                    --cpu '512' \
+                                    --cpu '256' \
                                     --memory '512' \
                                     --container-definitions '[
                                         {
@@ -114,7 +120,8 @@ pipeline {
                                             \"portMappings\": [
                                                 {
                                                     \"containerPort\": ${CONTAINER_PORT},
-                                                    \"hostPort\": ${CONTAINER_PORT}
+                                                    \"hostPort\": ${CONTAINER_PORT},
+                                                    \"protocol\": \"tcp\"
                                             }
                                         ],
                                         \"logConfiguration\": {
@@ -226,9 +233,6 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-access', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-
-                    sh "docker tag ${DOCKER_USERNAME}/api-github:latest ${DOCKER_USERNAME}/api-github:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_USERNAME}/api-github:${BUILD_NUMBER}"
                     sh "docker push ${DOCKER_USERNAME}/api-github:latest"
                 }
             }
