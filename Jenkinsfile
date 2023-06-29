@@ -132,24 +132,24 @@ pipeline {
                         ).trim()
 
                             echo "Task definition created: ${task_definition_arn}"
-//
-//                             // Create a EC2 task
-//                             def task_response = sh(
-//                                 script: """
-//                                 aws ecs run-task \
-//                                     --cluster ${AWS_CLUSTER_NAME} \
-//                                     --launch-type EC2 \
-//                                     --task-definition ${task_definition_arn} \
-//                                     --output json""",
-//                                 returnStdout: true
-//                             ).trim()
-//
-//                             def task_id = sh(
-//                                 script: "echo '${task_response}' | jq -r '.tasks[0].taskArn' | cut -d/ -f2",
-//                                 returnStdout: true
-//                             ).trim()
-//
-//                             echo "EC2 task started: ${task_id}"
+
+                            // Create a EC2 task
+                            def task_response = sh(
+                                script: """
+                                aws ecs run-task \
+                                    --cluster ${AWS_CLUSTER_NAME} \
+                                    --launch-type EC2 \
+                                    --task-definition ${task_definition_arn} \
+                                    --output json""",
+                                returnStdout: true
+                            ).trim()
+
+                            def task_id = sh(
+                                script: "echo '${task_response}' | jq -r '.tasks[0].taskArn' | cut -d/ -f2",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "EC2 task started: ${task_id}"
 
                             // Wait for the task to start running
 //                             timeout(time: 5, unit: 'MINUTES') {
