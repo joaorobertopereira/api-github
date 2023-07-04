@@ -64,7 +64,7 @@ Local:
 
 
 ### Swagger
-Url Swagger Local: http://localhost/webjars/swagger-ui/index.html
+Url Swagger Local: http://localhost/webjars/swagger-ui/index.html <br>
 AWS URL: http://ec2-3-92-180-168.compute-1.amazonaws.com/webjars/swagger-ui/index.html
 
 ![img.png](doc/img/swagger-01.png)
