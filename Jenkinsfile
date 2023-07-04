@@ -80,8 +80,8 @@ pipeline {
                         \"requiresCompatibilities\": [
                             \"EC2\"
                         ],
-                        \"cpu\": \"256\",
-                        \"memory\": \"512\"
+                        \"cpu\": 256,
+                        \"memory\": 512
                     }"""
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'aws-access']]) {
                         def task_definition_arn = sh(
