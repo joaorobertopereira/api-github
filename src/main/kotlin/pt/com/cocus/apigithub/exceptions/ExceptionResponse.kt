@@ -1,6 +1,10 @@
 package pt.com.cocus.apigithub.exceptions
 
-class ExceptionResponse(
+data class ExceptionResponse(
     var status: Int? = null,
     var message: String? = null
-)
+) {
+    fun toJson(): String {
+        return "{\"status\": \"$status\",\"message\": \"$message\"}"
+    }
+}
